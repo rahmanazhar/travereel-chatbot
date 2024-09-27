@@ -177,7 +177,7 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-2xl font-semibold mb-4 text-indigo-700">
-              Chat with AI
+              Chat with Vicky
             </h3>
             <div className="h-64 overflow-y-auto mb-4 bg-gray-100 p-4 rounded">
               {chatHistory.map((message, index) => (
