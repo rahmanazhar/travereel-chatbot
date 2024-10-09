@@ -12,33 +12,29 @@ const colors = {
   textOnColored: '#443600',
 };
 
-const ItinerarySuggestion = ({ data, userPreferences }) => {
-  const { itinerary } = data;
-  const [hotels, setHotels] = useState(data.hotels || []);
+const ItinerarySuggestion = ({ data }) => {
+  const { itinerary, hotels } = data;
   const [chatMessage, setChatMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [contextualPrompt, setContextualPrompt] = useState("");
   const [isLoadingHotels, setIsLoadingHotels] = useState(false);
 
   useEffect(() => {
-    const prompt = `The user has the following preferences: ${JSON.stringify(
-      userPreferences
-    )}. 
-    Their current itinerary is: ${itinerary}. 
+    const prompt = `The user's current itinerary is: ${itinerary}. 
     Please provide answers based on this context.`;
     setContextualPrompt(prompt);
 
-    if (!data.hotels || data.hotels.length === 0) {
+    if (!hotels || hotels.length === 0) {
       fetchHotelSuggestions();
     }
-  }, [userPreferences, itinerary, data.hotels]);
+  }, [itinerary, hotels]);
 
   const fetchHotelSuggestions = async () => {
     setIsLoadingHotels(true);
     try {
-      const destination = extractDestination(itinerary, userPreferences);
+      const destination = extractDestination(itinerary);
       const googleHotels = await fetchGoogleHotels(destination);
-      setHotels(parseGoogleHotels(googleHotels));
+      data.hotels = parseGoogleHotels(googleHotels);
     } catch (error) {
       console.error("Error fetching hotel suggestions:", error);
     } finally {
@@ -46,9 +42,9 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
     }
   };
 
-  const extractDestination = (itinerary, preferences) => {
+  const extractDestination = (itinerary) => {
     const firstDay = itinerary.split("**Day 1:")[1]?.split("\n")[0];
-    return firstDay ? firstDay.trim() : preferences.destination || "Paris";
+    return firstDay ? firstDay.trim() : "Paris";
   };
 
   const parseGoogleHotels = (googleHotels) => {
