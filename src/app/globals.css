@@ -3,17 +3,146 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --dark-grey: 107, 107, 107;
+  --dark-medium-grey: 148, 148, 148;
+  --medium-grey: 167, 167, 167;
+  --very-light-grey: 245, 245, 245;
+  --light-grey: 205, 205, 205;
+  --pure-black: 0, 0, 0;
+  --main-black: 19, 19, 19;
+  --pure-white: 255, 255, 255;
+  --main-white: 248, 250, 251;
+  --red: 224, 71, 95;
+  --green: 23, 191, 151;
+  --yellow: 246, 201, 14;
+  --accent: 188, 49, 234;
+  --purple: 197, 74, 226;
+  --dark-blue: 28, 39, 76;
+  --blue: 56, 113, 224;
+  --light-yellow: 228, 219, 140;
+  --dark-brown: 68, 54, 0;
+
+  --primary: var(--yellow);
+  --secondary: var(--main-black);
+  --tertiary: var(--main-white);
+  --quaternary: var(--purple);
+  --success: var(--green);
+  --error: var(--red);
+  --disabled-bg: var(--medium-grey);
+  --disabled-fg: var(--dark-grey);
+  --text-on-colored: var(--dark-brown);
+  --loading-bg: var(--light-yellow);
+
+  --foreground-rgb: var(--main-black);
+  --background-start-rgb: var(--main-white);
+  --background-end-rgb: var(--yellow);
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+    135deg,
+    rgb(var(--background-start-rgb)) 0%,
+    rgb(var(--background-end-rgb)) 100%
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Custom styles for SearchableDropdown */
+.searchable-dropdown {
+  position: relative;
+}
+
+.searchable-dropdown input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid rgb(var(--light-grey));
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.searchable-dropdown input:focus {
+  outline: none;
+  border-color: rgb(var(--blue));
+  box-shadow: 0 0 0 3px rgba(var(--blue), 0.5);
+}
+
+.searchable-dropdown ul {
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: rgb(var(--pure-white));
+  border: 1px solid rgb(var(--light-grey));
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 6px -1px rgba(var(--pure-black), 0.1), 0 2px 4px -1px rgba(var(--pure-black), 0.06);
+}
+
+.searchable-dropdown li {
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.searchable-dropdown li:hover {
+  background-color: rgb(var(--very-light-grey));
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+/* Custom styles for Wizard component */
+.wizard-step {
+  transition: all 0.3s ease-in-out;
+}
+
+.wizard-step.entering {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+.wizard-step.entered {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.wizard-step.exiting {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .wizard-container {
+    padding: 1rem;
+  }
 }

@@ -1,251 +1,224 @@
 "use client";
-import React, { useState } from "react";
-import {
-  CalendarIcon,
-  UsersIcon,
-  CurrencyDollarIcon,
-  MapPinIcon,
-} from "@heroicons/react/24/outline";
-import { processTraveData } from '../utils/dataProcessing';
-import ItinerarySuggestion from "./ItinerarySuggestion";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import SearchableDropdown from './SearchableDropdown';
+import countriesData from '../data/countries.json';
 
-export default function Wizard() {
+const Wizard = ({ onSubmit }) => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    country: "",
-    city: "",
-    startDate: "",
-    endDate: "",
-    budget: "",
-    persons: "",
-  });
+  const [destination, setDestination] = useState({ country: '', city: '' });
+  const [dates, setDates] = useState({ start: '', end: '' });
+  const [budget, setBudget] = useState('');
+  const [interests, setInterests] = useState('');
+  const [countries, setCountries] = useState([]);
+  const [cities, setCities] = useState([]);
 
-  const [itineraryData, setItineraryData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    setCountries(Object.keys(countriesData));
+  }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  useEffect(() => {
+    if (destination.country) {
+      setCities(countriesData[destination.country] || []);
+    } else {
+      setCities([]);
+    }
+  }, [destination.country]);
 
   const handleNext = () => {
     setStep(step + 1);
   };
 
-  const handlePrev = () => {
+  const handleBack = () => {
     setStep(step - 1);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      const data = await processTraveData(formData);
-      setItineraryData(data);
-      setStep(4); 
-    } catch (error) {
-      console.error("Error processing travel data:", error);
-      // Handle error (e.g., show error message to user)
-    } finally {
-      setIsLoading(false);
-    }
+    onSubmit({ destination, dates, budget, interests });
   };
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <>
-            <h2 className="text-2xl font-bold mb-6">
-              Where do you want to go?
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                  htmlFor="country"
-                >
-                  Country
-                </label>
-                <div className="relative">
-                  <MapPinIcon className="h-5 w-5 text-gray-400 absolute top-3 left-3" />
-                  <input
-                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    id="country"
-                    type="text"
-                    placeholder="Enter country"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                  htmlFor="city"
-                >
-                  City
-                </label>
-                <div className="relative">
-                  <MapPinIcon className="h-5 w-5 text-gray-400 absolute top-3 left-3" />
-                  <input
-                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    id="city"
-                    type="text"
-                    placeholder="Enter city"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-          </>
-        );
-      case 2:
-        return (
-          <>
-            <h2 className="text-2xl font-bold mb-6">When are you traveling?</h2>
-            <div className="space-y-4">
-              <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                  htmlFor="startDate"
-                >
-                  Start Date
-                </label>
-                <div className="relative">
-                  <CalendarIcon className="h-5 w-5 text-gray-400 absolute top-3 left-3" />
-                  <input
-                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    id="startDate"
-                    type="date"
-                    name="startDate"
-                    value={formData.startDate}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                  htmlFor="endDate"
-                >
-                  End Date
-                </label>
-                <div className="relative">
-                  <CalendarIcon className="h-5 w-5 text-gray-400 absolute top-3 left-3" />
-                  <input
-                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    id="endDate"
-                    type="date"
-                    name="endDate"
-                    value={formData.endDate}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-          </>
-        );
-      case 3:
-        return (
-          <>
-            <h2 className="text-2xl font-bold mb-6">
-              Tell us more about your trip
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                  htmlFor="budget"
-                >
-                  Budget (USD)
-                </label>
-                <div className="relative">
-                  <CurrencyDollarIcon className="h-5 w-5 text-gray-400 absolute top-3 left-3" />
-                  <input
-                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    id="budget"
-                    type="number"
-                    placeholder="Enter your budget"
-                    name="budget"
-                    value={formData.budget}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                  htmlFor="persons"
-                >
-                  Number of Travelers
-                </label>
-                <div className="relative">
-                  <UsersIcon className="h-5 w-5 text-gray-400 absolute top-3 left-3" />
-                  <input
-                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    id="persons"
-                    type="number"
-                    placeholder="Enter number of travelers"
-                    name="persons"
-                    value={formData.persons}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-          </>
-        );
-      default:
-        return null;
-    }
+
+  const stepVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -50 }
   };
 
   return (
-    <div className="w-[100%] mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-      {step < 4 ? (
-        <form onSubmit={handleSubmit}>
-          {renderStep()}
-          <div className="mt-8 flex justify-between">
-            {step > 1 && (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl"
+    >
+      <form onSubmit={handleSubmit}>
+        <AnimatePresence mode="wait">
+          {step === 1 && (
+            <motion.div
+              key="step1"
+              variants={stepVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-2xl font-bold mb-4">Where do you want to go?</h2>
+              <div className="mb-4">
+                <label className="block mb-2">Country</label>
+                <SearchableDropdown
+                  options={countries}
+                  placeholder="Select a country"
+                  onSelect={(country) => setDestination({ ...destination, country, city: '' })}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block mb-2">City</label>
+                <SearchableDropdown
+                  options={cities}
+                  placeholder="Select a city"
+                  onSelect={(city) => setDestination({ ...destination, city })}
+                  disabled={!destination.country}
+                />
+              </div>
               <button
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                type="button"
-                onClick={handlePrev}
-              >
-                Previous
-              </button>
-            )}
-            {step < 3 ? (
-              <button
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 type="button"
                 onClick={handleNext}
+                className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200"
               >
                 Next
               </button>
-            ) : (
-              <button
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                type="submit"
-              >
-                Submit
-              </button>
-            )}
-          </div>
-        </form>
-      ) : (
-        <ItinerarySuggestion data={itineraryData} />
-      )}
-      {isLoading && <p>Loading your personalized itinerary...</p>}
-    </div>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="step2"
+              variants={stepVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-2xl font-bold mb-4">When are you planning to travel?</h2>
+              <div className="mb-4">
+                <label className="block mb-2">Start Date</label>
+                <input
+                  type="date"
+                  value={dates.start}
+                  onChange={(e) => setDates({ ...dates, start: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block mb-2">End Date</label>
+                <input
+                  type="date"
+                  value={dates.end}
+                  onChange={(e) => setDates({ ...dates, end: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded"
+                  required
+                />
+              </div>
+              <div className="flex justify-between">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="bg-gray-300 text-gray-700 p-2 rounded hover:bg-gray-400 transition duration-200"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200"
+                >
+                  Next
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 3 && (
+            <motion.div
+              key="step3"
+              variants={stepVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-2xl font-bold mb-4">What's your budget?</h2>
+              <div className="mb-4">
+                <input
+                  type="number"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  placeholder="Enter your budget"
+                  className="w-full p-2 border border-gray-300 rounded"
+                  required
+                />
+              </div>
+              <div className="flex justify-between">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="bg-gray-300 text-gray-700 p-2 rounded hover:bg-gray-400 transition duration-200"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200"
+                >
+                  Next
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 4 && (
+            <motion.div
+              key="step4"
+              variants={stepVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-2xl font-bold mb-4">What are your interests?</h2>
+              <div className="mb-4">
+                <textarea
+                  value={interests}
+                  onChange={(e) => setInterests(e.target.value)}
+                  placeholder="Enter your interests (e.g., history, food, nature)"
+                  className="w-full p-2 border border-gray-300 rounded"
+                  rows="4"
+                  required
+                ></textarea>
+              </div>
+              <div className="flex justify-between">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="bg-gray-300 text-gray-700 p-2 rounded hover:bg-gray-400 transition duration-200"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  className="bg-green-500 text-white p-2 rounded hover:bg-green-600 transition duration-200"
+                >
+                  Submit
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </form>
+    </motion.div>
   );
-}
+};
+
+export default Wizard;

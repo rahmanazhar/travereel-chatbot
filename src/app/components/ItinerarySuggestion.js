@@ -2,6 +2,16 @@ import React, { useState, useEffect } from "react";
 import { generateItinerary } from "../utils/api";
 import { fetchGoogleHotels } from "../utils/google-places-api-utils";
 
+const colors = {
+  primary: '#F6C90E',
+  secondary: '#131313',
+  tertiary: '#F8FAFB',
+  quarternary: '#C54AE2',
+  success: '#17BF97',
+  error: '#E0475F',
+  textOnColored: '#443600',
+};
+
 const ItinerarySuggestion = ({ data, userPreferences }) => {
   const { itinerary } = data;
   const [hotels, setHotels] = useState(data.hotels || []);
@@ -26,7 +36,6 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
   const fetchHotelSuggestions = async () => {
     setIsLoadingHotels(true);
     try {
-      // Extract the destination from the itinerary or user preferences
       const destination = extractDestination(itinerary, userPreferences);
       const googleHotels = await fetchGoogleHotels(destination);
       setHotels(parseGoogleHotels(googleHotels));
@@ -38,10 +47,8 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
   };
 
   const extractDestination = (itinerary, preferences) => {
-    // This function should extract the main destination from the itinerary or preferences
-    // For simplicity, let's assume it's mentioned in the first day of the itinerary
     const firstDay = itinerary.split("**Day 1:")[1]?.split("\n")[0];
-    return firstDay ? firstDay.trim() : preferences.destination || "Paris"; // Default to Paris if no destination found
+    return firstDay ? firstDay.trim() : preferences.destination || "Paris";
   };
 
   const parseGoogleHotels = (googleHotels) => {
@@ -58,7 +65,7 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
     const parts = text.split(/(\*\*.*?\*\*)/g);
     return parts.map((part, index) => {
       if (part.startsWith("**") && part.endsWith("**")) {
-        return <strong key={index}>{part.slice(2, -2)}</strong>;
+        return <strong key={index} className="font-bold">{part.slice(2, -2)}</strong>;
       }
       return part;
     });
@@ -73,16 +80,16 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
         .split("\n")
         .filter((line) => line.trim() !== "");
       return (
-        <div key={index} className="mb-8 bg-white rounded-lg shadow-md p-6">
-          <h4 className="text-2xl font-bold mb-4 text-indigo-600">
+        <div key={index} className="mb-8 bg-tertiary rounded-xl shadow-lg p-6 transition-all duration-300 ease-in-out hover:shadow-xl">
+          <h4 className="text-2xl font-bold mb-4 text-secondary">
             Day {index + 1}
             {date && `: ${parseBoldText(date.trim())}`}
           </h4>
           <ul className="space-y-3">
             {activities.map((activity, actIndex) => (
               <li key={actIndex} className="flex items-start">
-                <span className="mr-2 mt-1 text-indigo-500">•</span>
-                <span>{parseBoldText(activity.trim())}</span>
+                <span className="mr-2 mt-1 text-primary">•</span>
+                <span className="text-secondary">{parseBoldText(activity.trim())}</span>
               </li>
             ))}
           </ul>
@@ -116,15 +123,15 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
   };
 
   return (
-    <div className="w-[100%] mx-auto p-6 bg-gray-100">
-      <h2 className="text-4xl font-bold mb-8 text-center text-indigo-800">
+    <div className="w-full mx-auto p-6 bg-tertiary">
+      <h2 className="text-4xl font-bold mb-8 text-center text-secondary">
         Your Personalized Itinerary
       </h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h3 className="text-2xl font-semibold mb-4 text-indigo-700">
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8 transition-all duration-300 ease-in-out hover:shadow-xl">
+            <h3 className="text-2xl font-semibold mb-4 text-secondary">
               Your Itinerary
             </h3>
             <div className="prose max-w-none">
@@ -132,12 +139,12 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
                 typeof itinerary === "string" ? (
                   formatItinerary(itinerary)
                 ) : (
-                  <p className="text-red-500">
+                  <p className="text-error">
                     Itinerary format is not as expected. Please try again.
                   </p>
                 )
               ) : (
-                <p className="text-red-500">
+                <p className="text-error">
                   No itinerary generated. Please try again.
                 </p>
               )}
@@ -146,40 +153,40 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h3 className="text-2xl font-semibold mb-4 text-indigo-700">
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8 transition-all duration-300 ease-in-out hover:shadow-xl">
+            <h3 className="text-2xl font-semibold mb-4 text-secondary">
               Recommended Hotels
             </h3>
             {isLoadingHotels ? (
-              <p className="text-gray-600">Loading hotel suggestions...</p>
+              <p className="text-secondary">Loading hotel suggestions...</p>
             ) : hotels && hotels.length > 0 ? (
               <div className="space-y-4">
                 {hotels.map((hotel, index) => (
-                  <div key={index} className="border-b pb-4 last:border-b-0">
-                    <h4 className="text-xl font-medium text-indigo-600">
+                  <div key={index} className="border-b border-primary pb-4 last:border-b-0">
+                    <h4 className="text-xl font-medium text-secondary">
                       {hotel.name}
                     </h4>
                     {hotel.lowestRate && (
-                      <p className="text-gray-600">
-                        Price: ${hotel.lowestRate} per night
+                      <p className="text-secondary">
+                        Price: {hotel.lowestRate} per night
                       </p>
                     )}
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-secondary opacity-75">
                       {hotel.address?.cityName}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-600">No hotel suggestions available.</p>
+              <p className="text-secondary">No hotel suggestions available.</p>
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-2xl font-semibold mb-4 text-indigo-700">
+          <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 ease-in-out hover:shadow-xl">
+            <h3 className="text-2xl font-semibold mb-4 text-secondary">
               Chat with Vicky
             </h3>
-            <div className="h-64 overflow-y-auto mb-4 bg-gray-100 p-4 rounded">
+            <div className="h-64 overflow-y-auto mb-4 bg-tertiary p-4 rounded-lg">
               {chatHistory.map((message, index) => (
                 <div
                   key={index}
@@ -189,7 +196,7 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
                 >
                   <span
                     className={`inline-block p-2 rounded-lg ${
-                      message.role === "user" ? "bg-indigo-100" : "bg-green-100"
+                      message.role === "user" ? "bg-primary text-textOnColored" : "bg-quarternary text-tertiary"
                     }`}
                   >
                     {parseBoldText(message.content)}
@@ -203,11 +210,11 @@ const ItinerarySuggestion = ({ data, userPreferences }) => {
                 value={chatMessage}
                 onChange={(e) => setChatMessage(e.target.value)}
                 placeholder="Ask about your itinerary..."
-                className="flex-grow border rounded-l-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-grow border-2 border-primary rounded-l-lg p-2 focus:outline-none focus:ring-2 focus:ring-quarternary transition-all duration-300 ease-in-out"
               />
               <button
                 type="submit"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="bg-primary text-textOnColored px-4 py-2 rounded-r-lg hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-quarternary transition-all duration-300 ease-in-out"
               >
                 Send
               </button>
