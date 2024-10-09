@@ -43,7 +43,7 @@ const ItinerarySuggestion = ({ data }) => {
   };
 
   const extractDestination = (itinerary) => {
-    const firstDay = itinerary.split("**Day 1:")[1]?.split("\n")[0];
+    const firstDay = itinerary.split("Day 1:")[1]?.split("\n")[0];
     return firstDay ? firstDay.trim() : "Paris";
   };
 
@@ -58,18 +58,13 @@ const ItinerarySuggestion = ({ data }) => {
   };
 
   const parseBoldText = (text) => {
-    const parts = text.split(/(\*\*.*?\*\*)/g);
-    return parts.map((part, index) => {
-      if (part.startsWith("**") && part.endsWith("**")) {
-        return <strong key={index} className="font-bold">{part.slice(2, -2)}</strong>;
-      }
-      return part;
-    });
+    text = text.replace(/\*/g, '');
+    return text.replace(/\*\*(.*?)\*\*/g, '$1');
   };
 
   const formatItinerary = (itineraryText) => {
     const days = itineraryText
-      .split(/\*\*Day \d+:/g)
+      .split(/Day \d+:/g)
       .filter((day) => day.trim() !== "");
     return days.map((day, index) => {
       const [date, ...activities] = day
@@ -192,7 +187,7 @@ const ItinerarySuggestion = ({ data }) => {
                 >
                   <span
                     className={`inline-block p-2 rounded-lg ${
-                      message.role === "user" ? "bg-primary text-textOnColored" : "bg-quarternary text-tertiary"
+                      message.role === "user" ? "bg-primary text-textOnColored" : "bg-success text-tertiary"
                     }`}
                   >
                     {parseBoldText(message.content)}
