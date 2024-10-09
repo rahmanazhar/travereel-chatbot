@@ -246,7 +246,7 @@ const Wizard = () => {
               className="flex items-start space-x-8"
             >
               <div className="flex-1">
-                <h2 className="text-3xl font-bold mb-6 text-blue-800">What's your budget?</h2>
+                <h2 className="text-3xl font-bold mb-6 text-blue-800">What&apos;s your budget?</h2>
                 <p className="text-gray-600 mb-4">Enter your travel budget and number of travelers to help us plan accordingly.</p>
                 <div className="mb-6">
                   <label className="block mb-2 font-semibold">Budget (in USD)</label>
