@@ -1,11 +1,18 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLoadScript } from '@react-google-maps/api';
 import SearchableDropdown from './SearchableDropdown';
 import countriesData from '../data/countries.json';
 import Image from 'next/image';
 import { processTraveData } from '../utils/dataProcessing';
 import ItinerarySuggestion from './ItinerarySuggestion';
+
+const predefinedInterests = [
+  "History", "Food", "Nature", "Adventure", "Culture", "Relaxation", "Shopping", "Nightlife", "Art", "Sports"
+];
+
+const libraries = ['places'];
 
 const Wizard = () => {
   const [step, setStep] = useState(1);
@@ -20,8 +27,23 @@ const Wizard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [travelData, setTravelData] = useState(null);
 
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY,
+    libraries,
+  });
+
   useEffect(() => {
     setCountries(Object.keys(countriesData));
+    
+    // Set default dates
+    const today = new Date();
+    const threeDaysLater = new Date(today);
+    threeDaysLater.setDate(today.getDate() + 3);
+
+    setDates({
+      start: today.toISOString().split('T')[0],
+      end: threeDaysLater.toISOString().split('T')[0]
+    });
   }, []);
 
   useEffect(() => {
@@ -52,7 +74,7 @@ const Wizard = () => {
         if (!numPersons || numPersons < 1) newErrors.numPersons = "Please enter a valid number of travelers";
         break;
       case 4:
-        if (interests.length === 0) newErrors.interests = "Please enter at least one interest";
+        if (interests.length === 0) newErrors.interests = "Please select at least one interest";
         break;
     }
     setErrors(newErrors);
@@ -83,7 +105,7 @@ const Wizard = () => {
         interests: interests
       };
       try {
-        const result = await processTraveData(formData);
+        const result = await processTraveData(formData, isLoaded);
         setTravelData(result);
       } catch (error) {
         console.error('Error processing travel data:', error);
@@ -94,9 +116,12 @@ const Wizard = () => {
     }
   };
 
-  const handleInterestsChange = (e) => {
-    const interestsArray = e.target.value.split(',').map(interest => interest.trim()).filter(interest => interest !== '');
-    setInterests(interestsArray);
+  const handleInterestsChange = (interest) => {
+    setInterests(prevInterests => 
+      prevInterests.includes(interest)
+        ? prevInterests.filter(i => i !== interest)
+        : [...prevInterests, interest]
+    );
   };
 
   const stepVariants = {
@@ -113,6 +138,14 @@ const Wizard = () => {
       ></div>
     </div>
   );
+
+  if (loadError) {
+    return <div>Error loading Google Maps API: {loadError.message}</div>;
+  }
+
+  if (!isLoaded) {
+    return <div>Loading Google Maps API...</div>;
+  }
 
   if (travelData) {
     return <ItinerarySuggestion data={travelData} />;
@@ -197,6 +230,7 @@ const Wizard = () => {
                     onChange={(e) => setDates({ ...dates, start: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
+                    min={new Date().toISOString().split('T')[0]}
                   />
                   {errors.startDate && <p className="text-red-500 mt-1">{errors.startDate}</p>}
                 </div>
@@ -208,6 +242,7 @@ const Wizard = () => {
                     onChange={(e) => setDates({ ...dates, end: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
+                    min={dates.start}
                   />
                   {errors.endDate && <p className="text-red-500 mt-1">{errors.endDate}</p>}
                 </div>
@@ -308,19 +343,22 @@ const Wizard = () => {
             >
               <div className="flex-1">
                 <h2 className="text-3xl font-bold mb-6 text-blue-800">What are your interests?</h2>
-                <p className="text-gray-600 mb-4">Tell us about your interests to personalize your travel experience. Separate each interest with a comma.</p>
-                <div className="mb-6">
-                  <label className="block mb-2 font-semibold">Interests</label>
-                  <textarea
-                    value={interests.join(', ')}
-                    onChange={handleInterestsChange}
-                    placeholder="Enter your interests (e.g., history, food, nature)"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    rows="4"
-                    required
-                  ></textarea>
-                  {errors.interests && <p className="text-red-500 mt-1">{errors.interests}</p>}
+                <p className="text-gray-600 mb-4">Select your interests to personalize your travel experience.</p>
+                <div className="mb-6 grid grid-cols-2 gap-4">
+                  {predefinedInterests.map((interest) => (
+                    <div key={interest} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={interest}
+                        checked={interests.includes(interest)}
+                        onChange={() => handleInterestsChange(interest)}
+                        className="mr-2"
+                      />
+                      <label htmlFor={interest}>{interest}</label>
+                    </div>
+                  ))}
                 </div>
+                {errors.interests && <p className="text-red-500 mt-1">{errors.interests}</p>}
                 <div className="flex justify-between">
                   <button
                     type="button"
