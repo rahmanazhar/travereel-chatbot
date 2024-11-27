@@ -1,11 +1,15 @@
 import { Poppins } from 'next/font/google'
 import './globals.css'
+import { initDatabase } from './utils/database'
 
 const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
   display: 'swap',
 })
+
+// Initialize database connection
+initDatabase().catch(console.error);
 
 export const metadata = {
   title: 'Travereel',
