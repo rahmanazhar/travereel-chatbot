@@ -1,0 +1,15 @@
+{
+  "name": "travereel-training-scripts",
+  "version": "1.0.0",
+  "description": "Data preparation and training scripts for Travereel chatbot",
+  "main": "prepare_data.js",
+  "type": "module",
+  "scripts": {
+    "prepare-data": "node prepare_data.js"
+  },
+  "dependencies": {
+    "mysql2": "^3.6.5",
+    "dotenv": "^16.3.1"
+  },
+  "private": true
+}
